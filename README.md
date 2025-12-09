@@ -1,6 +1,7 @@
 # TRACE Content Template
 
 This repository serves as a template for creating new TRACE analysis content repositories.
+Timestamped Reproducible Analytics for Crypto Ecosystems.
 
 ## Purpose
 
@@ -23,16 +24,25 @@ Before starting, ensure you have:
    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
    ```
 
-2. **FlipsideAI MCP Key** — Required for running SQL queries via the Flipside MCP tools
+2. **FlipsideAI MCP Key** — Required for running SQL queries via the Flipside MCP tools to query crypto data. Available at: https://flipsidecrypto.xyz/chat/settings/mcp-keys - generous free tier available. 
 
 3. **Verify installation**:
    ```bash
    uv run python --version
    ```
 
+4. **Read the guides**:
+   - `templates.md` — Report layout options
+   - `highcharts_embedding_guide.md` — Chart conventions
+   - `GET-STARTED.md` - An LLM input to explain the repo and confirm your MCP key is active.
+
+---
+
 ## Quick Start
 
 ### 1. Create a New Analysis Repository
+
+CLONE & RENAME is easiest way.
 
 ```bash
 # Clone this template
@@ -46,131 +56,147 @@ git add .
 git commit -m "Initial commit: Analysis template"
 ```
 
-### 2. Customize the Template
+### 2. Choose a Template
 
-1. **Rename `content-template.html`** to `REPORT.html` (or your analysis name, e.g., `aerodrome-rise.html`)
-   - This file becomes your final standalone HTML report
-   
-2. **Update the HTML content**:
-   - Replace title, subtitle, and all lorem ipsum text
-   - Replace `REPLACE_WITH_GITHUB_REPO_URL` with your actual GitHub repository URL (in navigation and footer links)
-   - Add your Highcharts visualizations
-   - Add your data tables
-   - Update the Table of Contents
-   - Fill in Author, Reviewer, Network(s), Timestamp Range, Data source
+Review `templates.md` and select the appropriate layout:
 
-3. **Add your analysis files**:
-   - SQL queries → `queries/` folder
-   - Data files → `data/` folder
-   - Visual files → `visuals/` folder (see `highcharts_embedding_guide.md` for chart configuration)
+| Template | Best For |
+|----------|----------|
+| **0: Minimal** | Single visualization with evolving data |
+| **1: Simple Overview** | Standard report with metrics + viz + table |
+| **2: Comparison** | Comparing two groups side-by-side |
+| **3: Alternating Narrative** | Deep-dive with multiple advanced metrics |
+| **4: Multi-Section Report** | Linear narrative, static/time-bound analysis |
+| **5: Grid Dashboard** | Multiple self-explanatory visualizations |
+| **6: Viz + Table** | Minimalist with summary statistics |
+| **7: Report Style** | Multi-faceted overview at consistent depth |
 
-4. **Create `trace-metadata.json`** (copy from `trace-metadata.json.example`)
+### 3. Create Your Files
 
-5. **Update this README.md** with your analysis details:
-   - Replace the template description with your analysis overview
-   - Add key findings / summary
-   - Document your specific repository structure
-   - Include data sources and methodology
-   - Add rebuild instructions specific to your analysis
-   - Keep an "About TRACE" section linking back to this template
+1. **Create `REPORT.html`** following your chosen template structure
+2. **Add SQL queries** → `queries/` folder (e.g., `01_market_share.sql`)
+3. **Add data files** → `data/` folder (e.g., `01_market_share.json`)
+4. **Add visual files** → `visuals/` folder (e.g., `AREA_market_share.html`)
+5. **Create `trace-metadata.json`** with your analysis details
 
-### 3. Create `trace-metadata.json`
+### 4. Commit and Push
 
-**CRITICAL**: Every content repository MUST include a `trace-metadata.json` file in the root directory. This file tells the TRACE website how to link to and display your analysis.
+```bash
+git add .
+git commit -m "Initial analysis"
+git remote add origin <your-repo-url>
+git push -u origin main
+```
 
-Copy `trace-metadata.json.example` to `trace-metadata.json` and fill in your analysis details.
+---
 
 ## Directory Structure
 
 ```
 my-analysis-repo/
 ├── trace-metadata.json          # REQUIRED: Metadata for TRACE website
-├── content-template.html        # Rename this to your analysis name
-├── REPORT.html                  # Final standalone HTML report (generated)
-├── INSTRUCTIONS.md              # Guide for rebuilding REPORT from components
+├── templates.md                 # Report layout templates (choose one)
+├── REPORT.html                  # Final report (embeds visuals into chosen template layout)
 ├── README.md                    # Analysis-specific README
 ├── pyproject.toml               # UV project configuration
-├── highcharts_embedding_guide.md # Highcharts style guide and patterns
-├── queries/                     # SQL query files (01_*.sql, 02_*.sql, ...)
-│   ├── 01_market-share.sql
-│   ├── 02_whale-transactions.sql
-│   └── 03_pool-analysis.sql
-├── data/                        # Data files (JSON, matches query names)
-│   ├── 01_market-share.json
-│   ├── 02_whale-transactions.json
-│   └── 03_pool-analysis.json
-├── visuals/                      # Highcharts HTML visual files (VIZTYPE_TITLE.html)
-│   ├── AREA_market_share_weekly.html
+├── highcharts_embedding_guide.md # Highcharts style guide
+├── queries/                     # SQL query files
+│   ├── 01_market_share.sql
+│   └── 02_volume_analysis.sql
+├── data/                        # JSON data files (match query names)
+│   ├── 01_market_share.json
+│   └── 02_volume_analysis.json
+├── visuals/                     # Standalone Highcharts HTML files (viewable individually)
+│   ├── AREA_market_share.html   # Complete HTML with data embedded
 │   └── LINE_volume_daily.html
-├── utils/                        # Utility scripts
-│   └── swap_placeholder.py      # Placeholder replacement for report assembly
-└── assets/                      # Images, thumbnails
+├── utils/
+│   └── swap_placeholder.py      # Placeholder replacement utility
+└── assets/
     └── thumbnail.png
 ```
 
-## Workflow & File Organization
+## File Relationships
 
-### Generation Process
+- **QUERY → DATA**: 1:1 relationship
+  - `queries/01_market_share.sql` → `data/01_market_share.json`
 
-Analyses are typically generated via LLM/MCP calls with access to Python, terminal, JavaScript, etc. The process outputs:
+- **DATA → VISUAL**: 1:many relationship  
+  - `data/01_market_share.json` → `visuals/AREA_market_share.html`
+  - `data/01_market_share.json` → `visuals/LINE_market_share.html`
 
-- **REPORT**: Final standalone HTML file (e.g., `aerodrome-rise.html`)
-- **DATA**: JSON files in `data/` folder, one per query
-- **QUERY**: SQL files in `queries/` folder, one per data file
-- **VISUAL**: Highcharts HTML files in `visuals/` folder
-- **METADATA**: `trace-metadata.json` with analysis metadata
-- **INSTRUCTIONS**: Documentation for rebuilding the report (see below)
+### VISUALS vs REPORT
 
-**Build Utility**:
-A Python utility `utils/swap_placeholder.py` is provided to help assemble the final report. It replaces text placeholders (e.g., `{{DATA_01}}`) with the contents of a file.
+| File | Purpose | Contains |
+|------|---------|----------|
+| `visuals/*.html` | **Standalone** — viewable in browser for debugging/review | Complete HTML (`<html>`, `<head>`, Highcharts CDN, data embedded) |
+| `REPORT.html` | **Final deliverable** — the published analysis | Full report with charts duplicated from `visuals/` |
 
-**Python Setup**:
-This repository uses [UV](https://github.com/astral-sh/uv) for Python environment management. Install UV, then run Python scripts:
+**Why duplication?** Each VISUAL file is self-contained so you can open it directly to test/debug a single chart. The REPORT then assembles all visuals into the final narrative layout.
 
-```bash
-# Install UV
-curl -LsSf https://astral.sh/uv/install.sh | sh
+> ⚠️ **Keep in sync**: If you edit a chart in REPORT, update the matching VISUAL file (and vice versa). They should always match.
 
-# Run Python scripts with UV
-uv run python utils/swap_placeholder.py my-report.html "{{DATA_01}}" data/01_data.json
+---
+
+## Assembly Process
+
+This section documents how to rebuild the REPORT from component files **without re-running SQL queries**.
+
+### Step 1: Create HTML Structure
+
+Create `REPORT.html` following your chosen template layout from `templates.md`. Use placeholders for content that will be injected:
+
+```html
+<script>
+  const data01 = {{DATA_01_PLACEHOLDER}};
+</script>
+
+<details class="query-section">
+  <summary>View SQL Query</summary>
+  <pre><code class="sql">{{QUERY_01_PLACEHOLDER}}</code></pre>
+</details>
+
+<div class="chart-wrapper">
+  {{VISUAL_01_PLACEHOLDER}}
+</div>
 ```
 
-UV will automatically install Python and manage the virtual environment.
+### Step 2: Inject Content with swap_placeholder.py
 
-### File Naming Conventions
+Use the utility to replace placeholders with file contents:
 
-- **QUERY files**: Use sequential prefixes for ordering (e.g., `01_market_share.sql`, `02_whale_transactions.sql`)
-- **DATA files**: Match query names (e.g., `01_market_share.json`, `02_whale_transactions.json`)
-- **VISUAL files**: Use descriptive names with chart type prefix (e.g., `AREA_tx_fee_revenue_usd_weekly.html`, `LINE_daily_volume.html`)
+```bash
+# Inject data into REPORT
+uv run python utils/swap_placeholder.py REPORT.html "{{DATA_01_PLACEHOLDER}}" data/01_market_share.json
 
-### File Relationships
+# Inject data in STANDALONE VISUAL
+uv run python utils/swap_placeholder.py visuals/AREA_market_share.html "{{VISUAL_01_PLACEHOLDER}}" data/01_market_share.json
+```
 
-- **1 QUERY = 1 DATA**: Each SQL query produces exactly one data file (1:1 relationship)
-- **1 DATA = 1+ VISUAL**: Each data file can be visualized by one or more visual files (1:many relationship)
-- **REPORT embeds everything**: The final HTML report should be standalone, with all data, visuals, and query text embedded/injected
+### Step 3: Finalize
 
-### INSTRUCTIONS File
+1. Ensure all CSS is inlined in `<style>` tags (standalone report)
+2. Ensure Highcharts loads via CDN
+3. Update metadata sections (Author, Reviewer, Network(s), Timestamp Range)
+4. Test that the report renders correctly with no broken references
 
-The `INSTRUCTIONS.md` file (or section in README) documents how to rebuild the report from the component files. This is **guidance for future LLM/human rebuilders**, not necessarily a fully automated script.
 
-**Purpose**: Document the assembly process so a future LLM can reconstruct the report without re-running queries.
+---
 
-**Expected content**:
-- File structure and relationships
-- Mapping of QUERY → DATA → VISUAL files
-- Step-by-step assembly process
-- Where/how to inject each component into the REPORT template
-- Any conventions or patterns used
+## Highcharts Best Practices
 
-**Note**: Some duplication is expected. Highcharts configuration will appear in both:
-- Individual VISUAL files (standalone for review/debugging)
-- Final REPORT file (embedded for self-contained report)
+See `highcharts_embedding_guide.md` for complete documentation. Key rules:
 
-This duplication is acceptable and keeps both files self-contained.
+1. **Use built-in `format:` strings** — avoid custom `formatter: function()`
+2. **Colors**: Use the high-contrast palette (`#0000B9`, `#FF2424`, etc.)
+3. **Credits**: Set to `'Data: FlipsideAI'`
+4. **Smart Titles & Subtitles** The title should be the point, the subtitle defining key terms or adding context.
+5. **X-axis dates**: Use `{value:%b '%y}` format (e.g., "Jan '20")
+
+---
 
 ## `trace-metadata.json` Format
 
-Create a `trace-metadata.json` file in the root of your repository with the following structure:
+**CRITICAL**: Every content repository MUST include this file.
 
 ```json
 {
@@ -178,8 +204,7 @@ Create a `trace-metadata.json` file in the root of your repository with the foll
     "id": "aerodrome-rise",
     "title": "The Rise of Aerodrome DEX on Base",
     "subtitle": "Market dominance analysis from August 2023 to August 2024",
-    "htmlFile": "aerodrome-rise.html",
-    "thumbnail": "assets/thumbnail.png"
+    "htmlFile": "aerodrome-rise.html"
   },
   "repository": {
     "url": "https://github.com/username/trace-aerodrome-rise",
@@ -210,7 +235,7 @@ Create a `trace-metadata.json` file in the root of your repository with the foll
 
 #### `repository` (required)
 - `url`: Full GitHub/GitLab URL to the repository
-- `branch`: Branch name (usually "main" or "master")
+- `branch`: Branch name (usually "main")
 
 #### `metadata` (required)
 - `author`: Analysis author name
@@ -218,95 +243,75 @@ Create a `trace-metadata.json` file in the root of your repository with the foll
 - `networks`: Array of blockchain networks analyzed
 - `timestampRange`: Object with `start` and `end` dates (YYYY-MM-DD)
 - `analysisDate`: When the analysis was completed (YYYY-MM-DD)
-- `dataSource`: Data provider (e.g., "FlipsideAI", "Dune", etc.)
+- `dataSource`: Data provider (e.g., "FlipsideAI")
 
-**Note**: SQL queries, data files, and documentation are discoverable via the GitHub repository link—they don't need to be listed in this metadata file.
+---
+
+## Validation Checklist
+
+Before finalizing:
+
+- [ ] All DATA files embedded
+- [ ] All QUERY files embedded
+- [ ] All VISUAL files embedded
+- [ ] VISUAL files match REPORT (keep in sync!)
+- [ ] TOC updated and links work
+- [ ] Metadata sections filled in
+- [ ] Report is standalone (no broken external references)
+- [ ] Highcharts loads and renders correctly
+- [ ] Credits show "Data: FlipsideAI"
+- [ ] Colors follow `highcharts_embedding_guide.md` palette
+- [ ] No custom formatter functions (use `format:` strings)
+
+---
 
 ## TRACE Website Integration
 
 The TRACE website will:
 
 1. **Scan repositories** for `trace-metadata.json` files
-2. **Extract metadata** to build the landing page snapshot cards
-3. **Link to HTML files** via GitHub's raw content URL (opens in new tab)
-4. **Display metadata** (author, networks, date range) from the JSON
-5. **Provide links** to the GitHub repository where queries, data, and documentation can be found
+2. **Extract metadata** to build landing page cards
+3. **Link to HTML files** via GitHub raw content URL
+4. **Provide links** to the GitHub repository for queries/data
 
-### Linking to HTML Files
+### Raw Content URL Format
 
-HTML reports are accessed via GitHub's raw content URL, which opens in a new tab:
-
-**Raw Content URL Format:**
 ```
 https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{htmlFile}
 ```
 
-**Example:**
-- Repository: `https://github.com/username/trace-aerodrome-rise`
-- Branch: `main`
-- HTML File: `aerodrome-rise.html`
-- Raw URL: `https://raw.githubusercontent.com/username/trace-aerodrome-rise/main/aerodrome-rise.html`
-
-**Implementation:**
-```html
-<a href="https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{htmlFile}" target="_blank" rel="noopener noreferrer">
-  View Report
-</a>
-```
-
-The HTML file should include a link back to the GitHub repository for users who want to explore queries, data, and documentation.
-
 ### HTML File Requirements
 
-- Must be self-contained or use relative paths
-- Should reference `styles.css` from the TRACE website (or include styles inline)
-- Highcharts should use CDN or be self-hosted
-- All data should be embedded in the HTML or use relative paths
-- Should include a link to the GitHub repository (from `trace-metadata.json`) so users can access queries, data, and documentation
+- Must be self-contained (all CSS inlined)
+- Highcharts via CDN
+- All data embedded in HTML
+- Include link back to GitHub repository
+
+---
 
 ## Best Practices
 
-1. **Keep it simple**: Static HTML, no build process required
-2. **Self-contained**: Analysis should work when cloned standalone
-3. **Document everything**: Include README with methodology, data sources, assumptions
-4. **Version your data**: Commit data files to git (or use git LFS for large files)
-5. **Tag releases**: Use git tags for major analysis versions
-6. **Validate JSON**: Ensure `trace-metadata.json` is valid JSON before committing
+1. **Keep it simple**: Static HTML, no build process
+2. **Self-contained**: Analysis works when cloned standalone
+3. **Document everything**: Methodology, data sources, assumptions
+4. **Version your data**: Commit data files to git
+5. **Tag releases**: Use git tags for major versions
+6. **Validate JSON**: Ensure `trace-metadata.json` is valid before committing
 
-## Example Workflow
-
-```bash
-# 1. Clone template
-git clone <template-repo> my-new-analysis
-cd my-new-analysis
-
-# 2. Customize
-mv content-template.html my-analysis.html
-# Edit HTML, add queries, add data
-
-# 3. Create metadata
-cp trace-metadata.json.example trace-metadata.json
-# Edit trace-metadata.json with your details
-
-# 4. Commit and push
-git add .
-git commit -m "Initial analysis"
-git remote add origin <your-repo-url>
-git push -u origin main
-```
+---
 
 ## Example Repository
 
-For a complete working example, see:
-
 **[eth_fusaka](https://github.com/fsc-data-science/eth_fusaka)** — Median Ethereum Transaction Fees analysis with key upgrade milestones (2020–present)
 
-This example demonstrates:
-- Proper README structure for an analysis repo
+Demonstrates:
+- Proper README structure
 - `trace-metadata.json` configuration
 - Query → Data → Visual file relationships
-- Final REPORT.html with embedded Highcharts visualization
+- Final REPORT.html with embedded Highcharts
+
+---
 
 ## Questions?
 
-See the main [TRACE website repository](https://github.com/fsc-data-science/TRACE) for integration details and website structure.
+See the main [TRACE website repository](https://github.com/fsc-data-science/TRACE) for integration details.
