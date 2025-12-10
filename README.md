@@ -172,7 +172,15 @@ uv run python utils/swap_placeholder.py REPORT.html "{{DATA_01_PLACEHOLDER}}" da
 uv run python utils/swap_placeholder.py visuals/AREA_market_share.html "{{VISUAL_01_PLACEHOLDER}}" data/01_market_share.json
 ```
 
-### Step 3: Finalize
+### Step 3: Validate
+
+Run the validation script to catch common issues:
+
+```bash
+uv run python utils/validation.py --verbose
+```
+
+### Step 4: Finalize
 
 1. Ensure all CSS is inlined in `<style>` tags (standalone report)
 2. Ensure Highcharts loads via CDN
@@ -247,16 +255,38 @@ See `highcharts_embedding_guide.md` for complete documentation. Key rules:
 
 ---
 
-## Validation Checklist
+## Validation
 
-Before finalizing:
+### Automated Validation
 
-- [ ] All DATA files embedded
-- [ ] All QUERY files embedded
-- [ ] All VISUAL files embedded
+Run the validation script to catch common issues:
+
+```bash
+# Basic validation
+uv run python utils/validation.py
+
+# Verbose output with all details
+uv run python utils/validation.py --verbose
+
+# Custom thresholds
+uv run python utils/validation.py --min-data-size 500 --check-sync
+```
+
+The script checks:
+- ✅ Required directories exist (`data/`, `queries/`, `visuals/`)
+- ✅ Files exist with correct extensions
+- ✅ Files meet minimum size thresholds (catches truncation)
+- ✅ `REPORT.html` exists
+- ✅ `trace-metadata.json` is valid and not using placeholder values
+- ✅ No unresolved `{{PLACEHOLDER}}` patterns
+- ✅ Data content appears embedded in REPORT and visuals (sync check)
+
+### Manual Checklist
+
+After automated validation passes:
+
 - [ ] VISUAL files match REPORT (keep in sync!)
 - [ ] TOC updated and links work
-- [ ] Metadata sections filled in
 - [ ] Report is standalone (no broken external references)
 - [ ] Highcharts loads and renders correctly
 - [ ] Credits show "Data: FlipsideAI"
