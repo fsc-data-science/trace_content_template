@@ -16,6 +16,6 @@ select max(block_timestamp) from ethereum.core.fact_blocks;
 Distribution of tx counts by block on ethereum over last 24 hours
 ```
 
-**If MCP tools are not available, alert me immediately.**
+**If MCP tools are not available, STOP and alert immediately.**
 
 ---

@@ -99,7 +99,12 @@ my-analysis-repo/
 ├── REPORT.html                  # Final report (embeds visuals into chosen template layout)
 ├── README.md                    # Analysis-specific README
 ├── pyproject.toml               # UV project configuration
-├── highcharts_embedding_guide.md # Highcharts style guide
+├── knowledge/                   # High-level guides on using TRACE effectively with Flipside CLI
+│   ├── api.md                   # Flipside API reference
+│   ├── flipside_cli.md          # CLI usage guide
+│   ├── highcharts_embedding_guide.md # Highcharts style guide
+│   ├── style.md                 # Styling and formatting guidelines
+│   └── templates.md             # Template usage instructions
 ├── queries/                     # SQL query files
 │   ├── 01_market_share.sql
 │   └── 02_volume_analysis.sql
